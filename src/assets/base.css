@@ -19,6 +19,14 @@
   --vt-c-text-light-2: rgba(60, 60, 60, 0.66);
   --vt-c-text-dark-1: var(--vt-c-white);
   --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
+
+  /* Figma palette */
+  --color-primary: #3A86FF;
+  --color-secondary: #8338EC;
+  --color-neutral-light: #F8F9FA;
+  --color-neutral-dark: #343A40;
+  --color-accent-warning: #FF595E;
+  --color-accent-success: #06D6A0;
 }
 
 /* semantic color variables for this project */
