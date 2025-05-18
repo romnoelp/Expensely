@@ -46,7 +46,7 @@ import { LayoutDashboard, BadgeRussianRuble, LogOut, HandCoins } from 'lucide-vu
 
     <main class="main-container pt-5">
       <div class="p-3">
-        <h1 style="font-size: 2.5rem; margin-bottom: 1.5rem;">Dashboard</h1>
+        <h1 style="font-size: 2.5rem; margin-bottom: 1.5rem; font-weight: bold;">Dashboard</h1>
 
         <div class="d-flex flex-wrap gap-3 mb-4">
           <div class="card flex-grow-1" style="min-width: 250px;">
