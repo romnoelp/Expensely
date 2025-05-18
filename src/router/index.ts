@@ -11,13 +11,13 @@ const router = createRouter({
       path:'/transactions',
       name: 'transactions',
       component: Transactions,
-      // meta: {requiresAuth: true}
+      meta: {requiresAuth: true}
     },
     {
       path: '/',
       name: 'dashboard',
       component: Dashboard,
-      // meta: {requiresAuth: true}
+      meta: {requiresAuth: true}
     },
     {
       path: '/signin',
