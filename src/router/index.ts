@@ -2,9 +2,17 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { supabase } from '../lib/supabase.ts'
 import SignIn from '../views/SignInView.vue';
 import Dashboard from '../views/DashboardView.vue';
+import Transactions from '../views/TransactionView.vue';
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path:'/transactions',
+      name: 'transactions',
+      component: Transactions,
+      // meta: {requiresAuth: true}
+    },
     {
       path: '/',
       name: 'dashboard',
