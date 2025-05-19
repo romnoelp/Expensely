@@ -16,7 +16,8 @@ const fetchData = async () => {
       amount,
       description,
       created_at
-    `, { count: '6' });
+    `)
+      .limit(8);
 
     response.value = data;
   } catch (error) {
