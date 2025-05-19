@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { LayoutDashboard, BadgeRussianRuble, LogOut, HandCoins } from 'lucide-vue-next';
+import AllTransactions from '../components/AllTransaction.vue';
 </script>
 
 <template>
@@ -47,86 +48,8 @@ import { LayoutDashboard, BadgeRussianRuble, LogOut, HandCoins } from 'lucide-vu
     <main class="main-container pt-5">
       <div class="p-3">
         <h1 style="font-size: 2.5rem; margin-bottom: 1.5rem; font-weight: bold;">Transactions</h1>
-
       </div>
-
-      <div class="table-container p-3">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="m-0" style="font-size: 1.25rem; font-weight: bold;">All Transactions</h5>
-        </div>
-        <div class="overflow-auto">
-          <table class="table table-bordered caption-top">
-            <thead>
-              <tr>
-                <th scope="col" style="padding: 0.75rem;">Entry</th>
-                <th scope="col" style="padding: 0.75rem;">Type</th>
-                <th scope="col" style="padding: 0.75rem;">Category</th>
-                <th scope="col" style="padding: 0.75rem;">Amount</th>
-                <th scope="col" style="padding: 0.75rem;">Description</th>
-                <th scope="col" style="padding: 0.75rem;">Date Added</th>
-              </tr>
-            </thead>
-            <tbody class="table-group-divider">
-              <tr>
-                <th scope="row" style="padding: 0.75rem;">April Salary</th>
-                <td style="padding: 0.75rem;">Income</td>
-                <td style="padding: 0.75rem;">Salary</td>
-                <td style="padding: 0.75rem;">₱150,000.00</td>
-                <td style="padding: 0.75rem;">Monthly salary from Acme Corp</td>
-                <td style="padding: 0.75rem;">2025-05-01</td>
-              </tr>
-              <tr>
-                <th scope="row" style="padding: 0.75rem;">Grocery Run</th>
-                <td style="padding: 0.75rem;">Expense</td>
-                <td style="padding: 0.75rem;">Groceries</td>
-                <td style="padding: 0.75rem;">₱6,022.50</td>
-                <td style="padding: 0.75rem;">Weekly groceries at local market</td>
-                <td style="padding: 0.75rem;">2025-05-02</td>
-              </tr>
-              <tr>
-                <th scope="row" style="padding: 0.75rem;">Gas Refill</th>
-                <td style="padding: 0.75rem;">Expense</td>
-                <td style="padding: 0.75rem;">Transport</td>
-                <td style="padding: 0.75rem;">₱2,250.00</td>
-                <td style="padding: 0.75rem;">Filled tank at local gas station</td>
-                <td style="padding: 0.75rem;">2025-05-03</td>
-              </tr>
-              <tr>
-                <th scope="row" style="padding: 0.75rem;">Logo Design</th>
-                <td style="padding: 0.75rem;">Income</td>
-                <td style="padding: 0.75rem;">Freelance</td>
-                <td style="padding: 0.75rem;">₱25,000.00</td>
-                <td style="padding: 0.75rem;">Freelance logo project for local café</td>
-                <td style="padding: 0.75rem;">2025-05-05</td>
-              </tr>
-              <tr>
-                <th scope="row" style="padding: 0.75rem;">Gym Membership</th>
-                <td style="padding: 0.75rem;">Expense</td>
-                <td style="padding: 0.75rem;">Fitness</td>
-                <td style="padding: 0.75rem;">₱1,999.50</td>
-                <td style="padding: 0.75rem;">Monthly gym subscription</td>
-                <td style="padding: 0.75rem;">2025-05-06</td>
-              </tr>
-              <tr>
-                <th scope="row" style="padding: 0.75rem;">Netflix Bill</th>
-                <td style="padding: 0.75rem;">Expense</td>
-                <td style="padding: 0.75rem;">Entertainment</td>
-                <td style="padding: 0.75rem;">₱799.50</td>
-                <td style="padding: 0.75rem;">Streaming service monthly payment</td>
-                <td style="padding: 0.75rem;">2025-05-08</td>
-              </tr>
-              <tr>
-                <th scope="row" style="padding: 0.75rem;">Dinner Out</th>
-                <td style="padding: 0.75rem;">Expense</td>
-                <td style="padding: 0.75rem;">Dining</td>
-                <td style="padding: 0.75rem;">₱4,250.00</td>
-                <td style="padding: 0.75rem;">Dinner with friends at local restaurant</td>
-                <td style="padding: 0.75rem;">2025-05-10</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <AllTransactions />
     </main>
   </div>
 </template>

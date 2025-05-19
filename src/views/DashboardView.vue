@@ -10,7 +10,7 @@ import RecentTransactions from '../components/RecentTransaction.vue';
         <div class="d-flex justify-content-center align-items-center gap-2">
           <HandCoins class="logo-icon" />
           <a class="navbar-brand" style="color: var(--color-neutral-light); font-size: 1.5rem; font-weight: bold;"
-            href="#">Expensely</a>
+            href="/">Expensely</a>
         </div>
         <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
           aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
@@ -24,13 +24,14 @@ import RecentTransactions from '../components/RecentTransaction.vue';
           <div class="offcanvas-body">
             <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
               <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="#"
+                <a class="nav-link active" aria-current="page" href="/"
                   style="font-size: 1.1rem; padding-top: 0.75rem; padding-bottom: 0.75rem;">
                   <LayoutDashboard class="align-middle me-2" style="width: 20px; height: 20px;" /> Dashboard
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#" style="font-size: 1.1rem; padding-top: 0.75rem; padding-bottom: 0.75rem;">
+                <a class="nav-link" href="/transactions"
+                  style="font-size: 1.1rem; padding-top: 0.75rem; padding-bottom: 0.75rem;">
                   <BadgeRussianRuble class="align-middle me-2" style="width: 20px; height: 20px;" /> Transactions
                 </a>
               </li>
