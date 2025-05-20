@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { supabase } from '../lib/supabase.ts';
+import Transaction from '../types/transaction.ts';
 import * as bootstrap from 'bootstrap';
-import Transaction from '../types/transaction.ts'
-
 
 const response = ref<Transaction[]>([]);
 const newEntry = ref({
@@ -43,7 +42,14 @@ const addEntry = async () => {
 
     await fetchData();
 
-    // 🧼 Reset newEntry WITHOUT user_id
+    // Close the modal programmatically
+    const modalEl = document.getElementById('addEntryModal');
+    if (modalEl) {
+      const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+      modal.hide();
+    }
+
+    // Reset form
     newEntry.value = {
       entry: '',
       type: '',
@@ -52,7 +58,10 @@ const addEntry = async () => {
       description: ''
     };
 
-    // Modal & Toast handling...
+    // Show toast
+    const toast = document.getElementById('entryToast');
+    if (toast) new bootstrap.Toast(toast).show();
+
   } catch (error: any) {
     console.error(error.message);
   }
@@ -62,6 +71,7 @@ onMounted(() => {
   fetchData();
 });
 </script>
+
 
 <template>
   <div class="d-flex justify-content-between align-items-center mb-3">
