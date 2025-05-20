@@ -1,128 +1,133 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { supabase } from '../lib/supabase.ts';
-import Transaction from '../types/transaction.ts';
+import { Transaction } from '../types/transaction.ts';
 
-
-let response = ref<Transaction[]>([]);
-const newEntry = reactive({
-  entry: '',
+const response = ref<Transaction[]>([]);
+const newEntry = ref({
   type: '',
   category: '',
   amount: 0,
-  description: '',
+  description: ''
 });
+
 const fetchData = async () => {
   try {
     const { data, error } = await supabase
       .from('transaction')
-      .select(`
-      entry,
-      type,
-      category,
-      amount,
-      description,
-      created_at
-    `)
+      .select('entry, type, category, amount, description, created_at')
       .order('id', { ascending: false })
       .limit(8);
 
+    if (error) throw error;
     response.value = data;
-  } catch (error) {
-    console.log(error.message);
+  } catch (error: any) {
+    console.error(error.message);
   }
-}
+};
+
+const addEntry = async () => {
+  try {
+    const { error } = await supabase.from('transaction').insert([newEntry.value]);
+    if (error) throw error;
+    await fetchData();
+    newEntry.value = { type: '', category: '', amount: 0, description: '' };
+    const modalElement = document.getElementById('addEntryModal');
+    if (modalElement) {
+      const modalInstance = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+      modalInstance.hide();
+    }
+  } catch (error: any) {
+    console.error(error.message);
+  }
+};
 
 onMounted(() => {
   fetchData();
-})
+});
 </script>
 
 <template>
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h5 class="m-0" style="font-size: 1.25rem; font-weight: bold;">Recent Transactions</h5>
-    <button class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 1rem;" data-bs-toggle="modal"
-      data-bs-target="#addEntryModal"> Add Entry</button>
-
-    <!--Modal-->
-    <!-- Modal -->
-    <div class="modal fade" id="addEntryModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-          <div class="modal-header bg-light border-0 rounded-top-4">
-            <h5 class="modal-title fw-bold" id="exampleModalLabel">Add New Entry</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-
-          <div class="modal-body p-4">
-            <form>
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <label for="entryInput" class="form-label">Entry</label>
-                  <input type="text" class="form-control rounded-3" id="entryInput" v-model="newEntry.entry"
-                    placeholder="e.g., Salary or Groceries" />
-                </div>
-                <div class="col-md-6">
-                  <label for="typeInput" class="form-label">Type</label>
-                  <input type="text" class="form-control rounded-3" id="typeInput" v-model="newEntry.type"
-                    placeholder="Income / Expense" />
-                </div>
-                <div class="col-md-6">
-                  <label for="categoryInput" class="form-label">Category</label>
-                  <input type="text" class="form-control rounded-3" id="categoryInput" v-model="newEntry.category"
-                    placeholder="e.g., Food, Salary" />
-                </div>
-                <div class="col-md-6">
-                  <label for="amountInput" class="form-label">Amount</label>
-                  <input type="number" class="form-control rounded-3" id="amountInput" v-model.number="newEntry.amount"
-                    placeholder="0.00" />
-                </div>
-                <div class="col-12">
-                  <label for="descriptionInput" class="form-label">Description</label>
-                  <textarea class="form-control rounded-3" id="descriptionInput" v-model="newEntry.description" rows="3"
-                    placeholder="Add any notes..."></textarea>
-                </div>
-              </div>
-            </form>
-          </div>
-
-          <div class="modal-footer bg-light border-0 rounded-bottom-4 d-flex justify-content-end px-4 py-3">
-            <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-primary px-4">Add Entry</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <h5 class="m-0 fw-bold" style="font-size: 1.25rem;">Recent Transactions</h5>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEntryModal">
+      Add Entry
+    </button>
   </div>
 
   <div class="overflow-auto">
     <table class="table table-bordered caption-top">
-      <thead>
+      <thead class="table-light">
         <tr>
-          <th scope="col" style="padding: 0.75rem;">Entry</th>
-          <th scope="col" style="padding: 0.75rem;">Type</th>
-          <th scope="col" style="padding: 0.75rem;">Category</th>
-          <th scope="col" style="padding: 0.75rem;">Amount</th>
-          <th scope="col" style="padding: 0.75rem;">Description</th>
-          <th scope="col" style="padding: 0.75rem;">Date Added</th>
+          <th>Entry</th>
+          <th>Type</th>
+          <th>Category</th>
+          <th>Amount</th>
+          <th>Description</th>
+          <th>Date Added</th>
         </tr>
       </thead>
       <tbody v-if="response.length > 0" class="table-group-divider">
-        <tr v-for="entry in response" :key="entry">
+        <tr v-for="entry in response" :key="entry.entry">
           <td>{{ entry.entry }}</td>
           <td>{{ entry.type }}</td>
           <td>{{ entry.category }}</td>
-          <td>{{ entry.amount }}</td>
+          <td>₱{{ entry.amount }}</td>
           <td>{{ entry.description }}</td>
-          <td>{{ entry.created_at }}</td>
+          <td>{{ new Date(entry.created_at).toLocaleDateString() }}</td>
         </tr>
       </tbody>
       <tbody v-else class="table-group-divider">
-        <tr>No entries added yet.</tr>
+        <tr>
+          <td colspan="6" class="text-center">No entries added yet.</td>
+        </tr>
       </tbody>
     </table>
   </div>
 
+  <!-- Add Entry Modal -->
+  <div class="modal fade" id="addEntryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content border-0 shadow rounded-4">
+        <div class="modal-header bg-light border-0 rounded-top-4">
+          <h5 class="modal-title fw-bold">Add New Entry</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body p-4">
+          <form @submit.prevent="addEntry">
+            <div class="mb-3">
+              <label class="form-label">Type</label>
+              <input type="text" class="form-control" v-model="newEntry.type" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Category</label>
+              <input type="text" class="form-control" v-model="newEntry.category" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Amount</label>
+              <input type="number" class="form-control" v-model.number="newEntry.amount" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Description</label>
+              <textarea class="form-control" v-model="newEntry.description" rows="3"></textarea>
+            </div>
+            <div class="modal-footer px-0">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary px-4">Add Entry</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+thead th {
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 1;
+}
+</style>
