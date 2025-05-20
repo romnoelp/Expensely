@@ -42,7 +42,7 @@ const addEntry = async () => {
 
     await fetchData();
 
-    // Close the modal programmatically
+    // Hide the modal after adding the entry
     const modalEl = document.getElementById('addEntryModal');
     if (modalEl) {
       const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
@@ -58,9 +58,9 @@ const addEntry = async () => {
       description: ''
     };
 
-    // Show toast
+    // Show toast with auto-hide options
     const toast = document.getElementById('entryToast');
-    if (toast) new bootstrap.Toast(toast).show();
+    if (toast) new bootstrap.Toast(toast, { delay: 3000, autohide: true }).show();
 
   } catch (error: any) {
     console.error(error.message);
@@ -71,7 +71,6 @@ onMounted(() => {
   fetchData();
 });
 </script>
-
 
 <template>
   <div class="d-flex justify-content-between align-items-center mb-3">
