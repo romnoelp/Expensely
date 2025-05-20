@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { supabase } from '../lib/supabase.ts';
-import { Transaction } from '../types/transaction.ts';
+import * as bootstrap from 'bootstrap';
+import Transaction from '../types/transaction.ts'
+
 
 const response = ref<Transaction[]>([]);
 const newEntry = ref({
+  entry: '',
   type: '',
   category: '',
   amount: 0,
@@ -13,6 +16,7 @@ const newEntry = ref({
 
 const fetchData = async () => {
   try {
+    const { data: { user } } = await supabase.auth.getUser();
     const { data, error } = await supabase
       .from('transaction')
       .select('entry, type, category, amount, description, created_at')
@@ -20,7 +24,7 @@ const fetchData = async () => {
       .limit(8);
 
     if (error) throw error;
-    response.value = data;
+    response.value = data as Transaction[];
   } catch (error: any) {
     console.error(error.message);
   }
@@ -28,15 +32,27 @@ const fetchData = async () => {
 
 const addEntry = async () => {
   try {
-    const { error } = await supabase.from('transaction').insert([newEntry.value]);
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) throw new Error('Failed to get user.');
+
+    const { error } = await supabase.from('transaction').insert([{
+      ...newEntry.value,
+      user_id: user.id
+    }]);
     if (error) throw error;
+
     await fetchData();
-    newEntry.value = { type: '', category: '', amount: 0, description: '' };
-    const modalElement = document.getElementById('addEntryModal');
-    if (modalElement) {
-      const modalInstance = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
-      modalInstance.hide();
-    }
+
+    // 🧼 Reset newEntry WITHOUT user_id
+    newEntry.value = {
+      entry: '',
+      type: '',
+      category: '',
+      amount: 0,
+      description: ''
+    };
+
+    // Modal & Toast handling...
   } catch (error: any) {
     console.error(error.message);
   }
@@ -97,8 +113,16 @@ onMounted(() => {
         <div class="modal-body p-4">
           <form @submit.prevent="addEntry">
             <div class="mb-3">
+              <label class="form-label">Entry</label>
+              <input type="text" class="form-control" v-model="newEntry.entry" required />
+            </div>
+            <div class="mb-3">
               <label class="form-label">Type</label>
-              <input type="text" class="form-control" v-model="newEntry.type" required />
+              <select class="form-select" v-model="newEntry.type" required>
+                <option disabled value="">Select type</option>
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+              </select>
             </div>
             <div class="mb-3">
               <label class="form-label">Category</label>
@@ -106,7 +130,8 @@ onMounted(() => {
             </div>
             <div class="mb-3">
               <label class="form-label">Amount</label>
-              <input type="number" class="form-control" v-model.number="newEntry.amount" required />
+              <input type="number" class="form-control" v-model.number="newEntry.amount" min="0.01" step="0.01"
+                required />
             </div>
             <div class="mb-3">
               <label class="form-label">Description</label>
@@ -118,6 +143,20 @@ onMounted(() => {
             </div>
           </form>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1200;">
+    <div id="entryToast" class="toast align-items-center text-white bg-success border-0" role="alert"
+      aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
+      <div class="d-flex">
+        <div class="toast-body">
+          Entry added successfully!
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+          aria-label="Close"></button>
       </div>
     </div>
   </div>
