@@ -92,7 +92,8 @@ onMounted(() => {
       <tbody v-if="response.length > 0" class="table-group-divider">
         <tr v-for="entry in response" :key="entry.entry">
           <td>{{ entry.entry }}</td>
-          <td>{{ entry.type }}</td>
+          <td>{{ entry.type.charAt(0).toUpperCase() + entry.type.slice(1) }}</td>
+
           <td>{{ entry.category }}</td>
           <td>₱{{ entry.amount }}</td>
           <td>{{ entry.description }}</td>
@@ -132,7 +133,21 @@ onMounted(() => {
             </div>
             <div class="mb-3">
               <label class="form-label">Category</label>
-              <input type="text" class="form-control" v-model="newEntry.category" required />
+              <select class="form-select" v-model="newEntry.category" required>
+                <option disabled value="">Select category</option>
+                <option value="Gym">Gym</option>
+                <option value="School">School</option>
+                <option value="Misc">Misc</option>
+                <option value="Motor">Motor</option>
+                <option value="Food">Food</option>
+                <option value="Utilities">Utilities</option>
+                <option value="Transportation">Transportation</option>
+                <option value="Savings">Savings</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Health">Health</option>
+                <option value="Shopping">Shopping</option>
+                <option value="Rent">Rent</option>
+              </select>
             </div>
             <div class="mb-3">
               <label class="form-label">Amount</label>
