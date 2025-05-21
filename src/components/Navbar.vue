@@ -1,7 +1,15 @@
 <script setup lang="ts">
-import { LayoutDashboard, BadgeRussianRuble, LogOut, HandCoins } from 'lucide-vue-next';
-</script>
+import { supabase } from '../lib/supabase.ts'
+import { useRouter } from 'vue-router'
+import { LayoutDashboard, BadgeRussianRuble, LogOut, HandCoins } from 'lucide-vue-next'
 
+const router = useRouter()
+
+const signOut = async () => {
+  await supabase.auth.signOut()
+  router.push('/signin')
+}
+</script>
 <template>
   <nav class="navbar fixed-top" style="background-color: var(--color-primary);">
     <div class="container-fluid">
@@ -34,7 +42,7 @@ import { LayoutDashboard, BadgeRussianRuble, LogOut, HandCoins } from 'lucide-vu
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">
+              <a class="nav-link" href="#" @click.prevent="signOut">
                 <LogOut class="align-middle me-2" style="width: 20px; height: 20px;" />
                 Logout
               </a>
