@@ -26,11 +26,10 @@ const fetchData = async () => {
       .select('entry, type, category, amount, description, created_at')
       .eq('user_id', user.id)
       .order('id', { ascending: false })
-      .limit(8)
+      .limit(7)
 
     if (error) throw error
 
-    // Map snake_case to camelCase to fit Transaction type
     response.value = (data ?? []).map(item => ({
       entry: item.entry,
       type: item.type,
