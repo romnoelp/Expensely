@@ -17,18 +17,35 @@ const editForm = ref({
 });
 
 const fetchData = async () => {
-  try {
-    const { data, error } = await supabase
-      .from('transaction')
-      .select('entry, type, category, amount, description, created_at');
-    if (error) throw error;
-    response.value = data ?? [];
-    await nextTick();
-    setupTooltips();
-  } catch (error: any) {
-    console.error("Error fetching data:", error.message);
+  const session = await supabase.auth.getUser();
+
+  const user = session?.data?.user;
+  const userError = session?.error;
+
+  if (!user || userError) {
+    console.error("User not logged in or error getting user:", userError?.message);
+    return;
   }
+
+  const query = supabase
+    .from('transaction')
+    .select('entry, type, category, amount, description, created_at')
+    .eq('user_id', user.id);
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("Error fetching transactions:", error.message);
+    return;
+  }
+
+  response.value = data || [];
+
+  console.log("Fetched transactions:", response.value); // 🔍 Debug
+  await nextTick();
+  setupTooltips();
 };
+
 
 const setupTooltips = () => {
   response.value.forEach((item) => {

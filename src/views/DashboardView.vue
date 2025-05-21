@@ -9,9 +9,13 @@ const transactions = ref<Transaction[]>([]);
 
 const fetchTransactions = async () => {
   try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) throw new Error('No user logged in');
+
     const { data, error } = await supabase
       .from('transaction')
       .select('entry, type, category, amount, description, created_at')
+      .eq('user_id', user.id)
       .order('id', { ascending: false })
       .limit(8);
 
@@ -21,6 +25,7 @@ const fetchTransactions = async () => {
     console.error('Error fetching transactions:', error.message);
   }
 };
+
 
 const totalIncome = computed(() =>
   transactions.value

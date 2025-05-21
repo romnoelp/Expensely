@@ -15,10 +15,13 @@ const newEntry = ref({
 
 const fetchData = async () => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) throw new Error('No user logged in.');
+
     const { data, error } = await supabase
       .from('transaction')
       .select('entry, type, category, amount, description, created_at')
+      .eq('user_id', user.id)
       .order('id', { ascending: false })
       .limit(8);
 
@@ -28,6 +31,7 @@ const fetchData = async () => {
     console.error(error.message);
   }
 };
+
 
 const addEntry = async () => {
   try {
