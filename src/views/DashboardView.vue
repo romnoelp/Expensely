@@ -3,48 +3,43 @@ import { ref, computed, onMounted } from 'vue';
 import Navbar from '../components/Navbar.vue';
 import RecentTransactions from '../components/RecentTransaction.vue';
 import { supabase } from '../lib/supabase.ts';
-import type Transaction from '../types/transaction.ts';
 
-const transactions = ref<Transaction[]>([]);
+const totalIncome = ref(0);
+const totalExpenses = ref(0);
+const totalBalance = computed(() => totalIncome.value - totalExpenses.value);
 
-const fetchTransactions = async () => {
+const fetchTotals = async () => {
   try {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) throw new Error('No user logged in');
 
     const { data, error } = await supabase
       .from('transaction')
-      .select('entry, type, category, amount, description, created_at')
-      .eq('user_id', user.id)
-      .order('id', { ascending: false })
-      .limit(8);
+      .select('type, amount')
+      .eq('user_id', user.id);
 
     if (error) throw error;
-    if (data) transactions.value = data as Transaction[];
+
+    if (data) {
+      totalIncome.value = data
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+
+      totalExpenses.value = data
+        .filter(t => t.type.toLowerCase() === 'expense')
+
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+    }
   } catch (error: any) {
-    console.error('Error fetching transactions:', error.message);
+    console.error('Error fetching totals:', error.message);
   }
 };
 
-
-const totalIncome = computed(() =>
-  transactions.value
-    .filter(t => t.type === 'income')
-    .reduce((sum, t) => sum + t.amount, 0)
-);
-
-const totalExpenses = computed(() =>
-  transactions.value
-    .filter(t => t.type === 'expense')
-    .reduce((sum, t) => sum + t.amount, 0)
-);
-
-const totalBalance = computed(() => totalIncome.value - totalExpenses.value);
-
 onMounted(() => {
-  fetchTransactions();
+  fetchTotals();
 });
 </script>
+
 
 <template>
   <div>
@@ -57,37 +52,22 @@ onMounted(() => {
         <div class="d-flex flex-wrap gap-3 mb-4">
           <div class="card flex-grow-1" style="min-width: 250px;">
             <div class="card-body d-flex flex-column align-items-center" style="padding: 1.5rem;">
-              <h5 class="card-title align-self-start"
-                style="font-size: 1rem; font-weight: normal; margin-bottom: 0.5rem;">
-                Total Balance
-              </h5>
-              <h1 class="align-self-center value" style="margin-top: 0.75rem; font-size: 3rem;">
-                ₱{{ totalBalance.toFixed(2) }}
-              </h1>
+              <h5 class="card-title align-self-start">Total Balance</h5>
+              <h1 class="align-self-center value">₱{{ totalBalance.toFixed(2) }}</h1>
             </div>
           </div>
 
           <div class="card flex-grow-1" style="min-width: 250px;">
             <div class="card-body d-flex flex-column align-items-center" style="padding: 1.5rem;">
-              <h5 class="card-title align-self-start"
-                style="font-size: 1rem; font-weight: normal; margin-bottom: 0.5rem;">
-                Total Income
-              </h5>
-              <h1 class="align-self-center value" style="margin-top: 0.75rem; font-size: 3rem;">
-                ₱{{ totalIncome.toFixed(2) }}
-              </h1>
+              <h5 class="card-title align-self-start">Total Income</h5>
+              <h1 class="align-self-center value">₱{{ totalIncome.toFixed(2) }}</h1>
             </div>
           </div>
 
           <div class="card flex-grow-1" style="min-width: 250px;">
             <div class="card-body d-flex flex-column align-items-center" style="padding: 1.5rem;">
-              <h5 class="card-title align-self-start"
-                style="font-size: 1rem; font-weight: normal; margin-bottom: 0.5rem;">
-                Total Expenses
-              </h5>
-              <h1 class="align-self-center value" style="margin-top: 0.75rem; font-size: 3rem;">
-                ₱{{ totalExpenses.toFixed(2) }}
-              </h1>
+              <h5 class="card-title align-self-start">Total Expenses</h5>
+              <h1 class="align-self-center value">₱{{ totalExpenses.toFixed(2) }}</h1>
             </div>
           </div>
         </div>
@@ -153,14 +133,12 @@ h5 {
 }
 
 .card-title {
-  color: var(--color-neutral-dark);
   font-size: 1rem;
   font-weight: normal;
   margin-bottom: 0.5rem;
 }
 
 .card-body h1 {
-  color: var(--color-neutral-dark);
   font-size: 3rem;
   margin-top: 0.75rem;
 }
