@@ -1,103 +1,103 @@
 <script setup lang="ts">
-import { supabase } from '../lib/supabase.ts';
-import { onMounted, ref, nextTick } from 'vue';
-import { Transaction } from '../types/transaction.ts';
-import * as bootstrap from 'bootstrap';
+import { supabase } from '../lib/supabase.ts'
+import { onMounted, ref, nextTick } from 'vue'
+import * as bootstrap from 'bootstrap'
+import type { Transaction } from '../types/transaction.ts'
 
-const response = ref<Transaction[]>([]);
-const selectedEntry = ref<Transaction | null>(null);
-const showModal = ref(false);
-const showActionPopup = ref(false);
-const shownTooltips = ref(new Set<string>());
+
+const response = ref<Transaction[]>([])
+const selectedEntry = ref<Transaction | null>(null)
+const showModal = ref(false)
+const showActionPopup = ref(false)
+const shownTooltips = ref(new Set<string>())
 const editForm = ref({
   type: '',
   category: '',
   amount: 0,
-  description: ''
-});
+  description: '',
+})
 
 const fetchData = async () => {
-  const session = await supabase.auth.getUser();
+  const session = await supabase.auth.getUser()
 
-  const user = session?.data?.user;
-  const userError = session?.error;
+  const user = session?.data?.user
+  const userError = session?.error
 
   if (!user || userError) {
-    console.error("User not logged in or error getting user:", userError?.message);
-    return;
+    console.error('User not logged in or error getting user:', userError?.message)
+    return
   }
 
   const query = supabase
     .from('transaction')
     .select('entry, type, category, amount, description, created_at')
-    .eq('user_id', user.id);
+    .eq('user_id', user.id)
 
-  const { data, error } = await query;
+  const { data, error } = await query
 
   if (error) {
-    console.error("Error fetching transactions:", error.message);
-    return;
+    console.error('Error fetching transactions:', error.message)
+    return
   }
 
-  response.value = data || [];
+  response.value = data || []
 
-  console.log("Fetched transactions:", response.value); // 🔍 Debug
-  await nextTick();
-  setupTooltips();
-};
-
+  console.log('Fetched transactions:', response.value) // 🔍 Debug
+  await nextTick()
+  setupTooltips()
+}
 
 const setupTooltips = () => {
   response.value.forEach((item) => {
-    const tooltipId = `tooltip-${item.entry}`;
-    const el = document.getElementById(tooltipId);
+    const tooltipId = `tooltip-${item.entry}`
+    const el = document.getElementById(tooltipId)
     if (el && !shownTooltips.value.has(item.entry)) {
       const tooltip = new bootstrap.Tooltip(el, {
         trigger: 'hover',
         title: 'Click to update or delete',
         delay: { show: 200, hide: 0 },
-      });
+      })
 
       el.addEventListener('shown.bs.tooltip', () => {
-        shownTooltips.value.add(item.entry);
-        tooltip.dispose();
-      });
+        shownTooltips.value.add(item.entry)
+        tooltip.dispose()
+      })
     }
-  });
-};
+  })
+}
 
 const openActionPopup = (entry: Transaction) => {
-  selectedEntry.value = entry;
-  showActionPopup.value = true;
-};
+  selectedEntry.value = entry
+  showActionPopup.value = true
+}
 
 const closeActionPopup = () => {
-  showActionPopup.value = false;
-  selectedEntry.value = null;
-};
+  showActionPopup.value = false
+  selectedEntry.value = null
+}
 
 const openModal = () => {
-  if (!selectedEntry.value) return;
+  if (!selectedEntry.value) return
 
   editForm.value = {
     type: selectedEntry.value.type || '',
     category: selectedEntry.value.category || '',
     amount: selectedEntry.value.amount || 0,
-    description: selectedEntry.value.description || ''
-  };
-  showModal.value = true;
-  showActionPopup.value = false;
-};
+    description: selectedEntry.value.description || '',
+  }
+  showModal.value = true
+  showActionPopup.value = false
+}
 
 const closeEditModal = () => {
-  showModal.value = false;
-  selectedEntry.value = null;
-};
+  showModal.value = false
+  selectedEntry.value = null
+}
 
 const updateEntry = async () => {
   if (!selectedEntry.value?.entry) {
-    console.error("Update failed: No selected entry.");
-    return;
+    console.error('Update failed: No selected entry.')
+    return
   }
 
   try {
@@ -107,54 +107,54 @@ const updateEntry = async () => {
         type: editForm.value.type,
         category: editForm.value.category,
         amount: editForm.value.amount,
-        description: editForm.value.description
+        description: editForm.value.description,
       })
-      .eq('entry', selectedEntry.value.entry);
+      .eq('entry', selectedEntry.value.entry)
 
-    if (error) throw error;
+    if (error) throw error
 
-    await fetchData();
-    showModal.value = false;
-    selectedEntry.value = null;
+    await fetchData()
+    showModal.value = false
+    selectedEntry.value = null
 
-    const toastEl = document.getElementById('updateSuccessToast');
-    if (toastEl) new bootstrap.Toast(toastEl, { delay: 3000 }).show();
+    const toastEl = document.getElementById('updateSuccessToast')
+    if (toastEl) new bootstrap.Toast(toastEl, { delay: 3000 }).show()
   } catch (error: any) {
-    console.error("Error updating entry:", error.message);
+    console.error('Error updating entry:', error.message)
   }
-};
+}
 
 const deleteEntry = async () => {
   if (!selectedEntry.value?.entry) {
-    console.error("Delete failed: No selected entry.");
-    return;
+    console.error('Delete failed: No selected entry.')
+    return
   }
 
   try {
     const { error } = await supabase
       .from('transaction')
       .delete()
-      .eq('entry', selectedEntry.value.entry);
-    if (error) throw error;
+      .eq('entry', selectedEntry.value.entry)
+    if (error) throw error
 
-    await fetchData();
-    closeActionPopup();
+    await fetchData()
+    closeActionPopup()
 
-    const toastEl = document.getElementById('deleteSuccessToast');
-    if (toastEl) new bootstrap.Toast(toastEl, { delay: 3000 }).show();
+    const toastEl = document.getElementById('deleteSuccessToast')
+    if (toastEl) new bootstrap.Toast(toastEl, { delay: 3000 }).show()
   } catch (error: any) {
-    console.error("Error deleting entry:", error.message);
+    console.error('Error deleting entry:', error.message)
   }
-};
+}
 
 onMounted(() => {
-  fetchData();
-});
+  fetchData()
+})
 </script>
 
 <template>
   <div class="table-container p-3">
-    <h5 class="mb-3 fw-bold" style="font-size: 1.25rem;">All Transactions</h5>
+    <h5 class="mb-3 fw-bold" style="font-size: 1.25rem">All Transactions</h5>
 
     <div class="overflow-auto">
       <div class="table-wrapper">
@@ -171,7 +171,7 @@ onMounted(() => {
           </thead>
           <tbody v-if="response.length > 0" class="table-group-divider">
             <tr v-for="item in response" :key="item.entry" :id="'tooltip-' + item.entry" @click="openActionPopup(item)"
-              style="cursor: pointer;" data-bs-toggle="tooltip" title="Click to update or delete">
+              style="cursor: pointer" data-bs-toggle="tooltip" title="Click to update or delete">
               <td>{{ item.entry }}</td>
               <td>{{ item.type }}</td>
               <td>{{ item.category }}</td>
@@ -190,7 +190,7 @@ onMounted(() => {
     </div>
 
     <!-- Action Popup Modal -->
-    <div v-if="showActionPopup" class="modal fade show d-block" tabindex="-1" style="background: rgba(0, 0, 0, 0.5);"
+    <div v-if="showActionPopup" class="modal fade show d-block" tabindex="-1" style="background: rgba(0, 0, 0, 0.5)"
       @click.self="closeActionPopup">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow rounded-4">
@@ -208,7 +208,7 @@ onMounted(() => {
     </div>
 
     <!-- Edit Modal -->
-    <div v-if="showModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0, 0, 0, 0.5);">
+    <div v-if="showModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0, 0, 0, 0.5)">
       <div class="modal-dialog">
         <div class="modal-content border-0 shadow rounded-4">
           <div class="modal-header bg-light border-0 rounded-top-4">
@@ -239,7 +239,9 @@ onMounted(() => {
                 <textarea id="descriptionEdit" class="form-control" v-model="editForm.description" rows="3"></textarea>
               </div>
               <div class="modal-footer px-0 mt-4">
-                <button type="button" class="btn btn-outline-secondary" @click="closeEditModal">Cancel</button>
+                <button type="button" class="btn btn-outline-secondary" @click="closeEditModal">
+                  Cancel
+                </button>
                 <button type="submit" class="btn btn-primary px-4">Save Changes</button>
               </div>
             </form>
@@ -250,7 +252,7 @@ onMounted(() => {
   </div>
 
   <!-- Toasts -->
-  <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1200;">
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1200">
     <div id="deleteSuccessToast" class="toast align-items-center text-white bg-danger border-0" role="alert"
       aria-live="assertive" aria-atomic="true">
       <div class="d-flex">

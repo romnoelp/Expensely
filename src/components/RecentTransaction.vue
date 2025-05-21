@@ -1,55 +1,71 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import { supabase } from '../lib/supabase.ts';
-import Transaction from '../types/transaction.ts';
-import * as bootstrap from 'bootstrap';
+import { onMounted, ref } from 'vue'
+import { supabase } from '../lib/supabase.ts'
+import type { Transaction } from '../types/transaction.ts'
+import * as bootstrap from 'bootstrap'
 
-const response = ref<Transaction[]>([]);
+const response = ref<Transaction[]>([])
 const newEntry = ref({
   entry: '',
   type: '',
   category: '',
   amount: 0,
-  description: ''
-});
+  description: '',
+})
 
 const fetchData = async () => {
   try {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) throw new Error('No user logged in.');
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser()
+    if (userError || !user) throw new Error('No user logged in.')
 
     const { data, error } = await supabase
       .from('transaction')
       .select('entry, type, category, amount, description, created_at')
       .eq('user_id', user.id)
       .order('id', { ascending: false })
-      .limit(8);
+      .limit(8)
 
-    if (error) throw error;
-    response.value = data as Transaction[];
+    if (error) throw error
+
+    // Map snake_case to camelCase to fit Transaction type
+    response.value = (data ?? []).map(item => ({
+      entry: item.entry,
+      type: item.type,
+      category: item.category,
+      amount: item.amount,
+      description: item.description,
+      created_at: item.created_at,
+    }))
   } catch (error: any) {
-    console.error(error.message);
+    console.error(error.message)
   }
-};
-
+}
 
 const addEntry = async () => {
   try {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) throw new Error('Failed to get user.');
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser()
+    if (userError || !user) throw new Error('Failed to get user.')
 
-    const { error } = await supabase.from('transaction').insert([{
-      ...newEntry.value,
-      user_id: user.id
-    }]);
-    if (error) throw error;
+    const { error } = await supabase.from('transaction').insert([
+      {
+        ...newEntry.value,
+        user_id: user.id,
+      },
+    ])
+    if (error) throw error
 
-    await fetchData();
+    await fetchData()
 
-    const modalEl = document.getElementById('addEntryModal');
+    const modalEl = document.getElementById('addEntryModal')
     if (modalEl) {
-      const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-      modal.hide();
+      const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl)
+      modal.hide()
     }
 
     newEntry.value = {
@@ -57,25 +73,24 @@ const addEntry = async () => {
       type: '',
       category: '',
       amount: 0,
-      description: ''
-    };
+      description: '',
+    }
 
-    const toast = document.getElementById('entryToast');
-    if (toast) new bootstrap.Toast(toast, { delay: 3000, autohide: true }).show();
-
+    const toast = document.getElementById('entryToast')
+    if (toast) new bootstrap.Toast(toast, { delay: 3000, autohide: true }).show()
   } catch (error: any) {
-    console.error(error.message);
+    console.error(error.message)
   }
-};
+}
 
 onMounted(() => {
-  fetchData();
-});
+  fetchData()
+})
 </script>
 
 <template>
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h5 class="m-0 fw-bold" style="font-size: 1.25rem;">Recent Transactions</h5>
+    <h5 class="m-0 fw-bold" style="font-size: 1.25rem">Recent Transactions</h5>
     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEntryModal">
       Add Entry
     </button>
@@ -97,7 +112,6 @@ onMounted(() => {
         <tr v-for="entry in response" :key="entry.entry">
           <td>{{ entry.entry }}</td>
           <td>{{ entry.type.charAt(0).toUpperCase() + entry.type.slice(1) }}</td>
-
           <td>{{ entry.category }}</td>
           <td>₱{{ entry.amount }}</td>
           <td>{{ entry.description }}</td>
@@ -163,7 +177,9 @@ onMounted(() => {
               <textarea class="form-control" v-model="newEntry.description" rows="3"></textarea>
             </div>
             <div class="modal-footer px-0">
-              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                Cancel
+              </button>
               <button type="submit" class="btn btn-primary px-4">Add Entry</button>
             </div>
           </form>
@@ -173,13 +189,11 @@ onMounted(() => {
   </div>
 
   <!-- Toast Notification -->
-  <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1200;">
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1200">
     <div id="entryToast" class="toast align-items-center text-white bg-success border-0" role="alert"
       aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
       <div class="d-flex">
-        <div class="toast-body">
-          Entry added successfully!
-        </div>
+        <div class="toast-body">Entry added successfully!</div>
         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
           aria-label="Close"></button>
       </div>

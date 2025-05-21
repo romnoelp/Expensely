@@ -1,45 +1,47 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import Navbar from '../components/Navbar.vue';
-import RecentTransactions from '../components/RecentTransaction.vue';
-import { supabase } from '../lib/supabase.ts';
+import { ref, computed, onMounted } from 'vue'
+import Navbar from '../components/Navbar.vue'
+import RecentTransactions from '../components/RecentTransaction.vue'
+import { supabase } from '../lib/supabase.ts'
 
-const totalIncome = ref(0);
-const totalExpenses = ref(0);
-const totalBalance = computed(() => totalIncome.value - totalExpenses.value);
+const totalIncome = ref(0)
+const totalExpenses = ref(0)
+const totalBalance = computed(() => totalIncome.value - totalExpenses.value)
 
 const fetchTotals = async () => {
   try {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) throw new Error('No user logged in');
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser()
+    if (userError || !user) throw new Error('No user logged in')
 
     const { data, error } = await supabase
       .from('transaction')
       .select('type, amount')
-      .eq('user_id', user.id);
+      .eq('user_id', user.id)
 
-    if (error) throw error;
+    if (error) throw error
 
     if (data) {
       totalIncome.value = data
-        .filter(t => t.type === 'income')
-        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+        .filter((t) => t.type === 'income')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0)
 
       totalExpenses.value = data
-        .filter(t => t.type.toLowerCase() === 'expense')
+        .filter((t) => t.type.toLowerCase() === 'expense')
 
-        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0)
     }
   } catch (error: any) {
-    console.error('Error fetching totals:', error.message);
+    console.error('Error fetching totals:', error.message)
   }
-};
+}
 
 onMounted(() => {
-  fetchTotals();
-});
+  fetchTotals()
+})
 </script>
-
 
 <template>
   <div>
@@ -47,25 +49,25 @@ onMounted(() => {
 
     <main class="main-container pt-5">
       <div class="p-3">
-        <h1 class="mb-4" style="font-size: 2.5rem; font-weight: bold;">Dashboard</h1>
+        <h1 class="mb-4" style="font-size: 2.5rem; font-weight: bold">Dashboard</h1>
 
         <div class="d-flex flex-wrap gap-3 mb-4">
-          <div class="card flex-grow-1" style="min-width: 250px;">
-            <div class="card-body d-flex flex-column align-items-center" style="padding: 1.5rem;">
+          <div class="card flex-grow-1" style="min-width: 250px">
+            <div class="card-body d-flex flex-column align-items-center" style="padding: 1.5rem">
               <h5 class="card-title align-self-start">Total Balance</h5>
               <h1 class="align-self-center value">₱{{ totalBalance.toFixed(2) }}</h1>
             </div>
           </div>
 
-          <div class="card flex-grow-1" style="min-width: 250px;">
-            <div class="card-body d-flex flex-column align-items-center" style="padding: 1.5rem;">
+          <div class="card flex-grow-1" style="min-width: 250px">
+            <div class="card-body d-flex flex-column align-items-center" style="padding: 1.5rem">
               <h5 class="card-title align-self-start">Total Income</h5>
               <h1 class="align-self-center value">₱{{ totalIncome.toFixed(2) }}</h1>
             </div>
           </div>
 
-          <div class="card flex-grow-1" style="min-width: 250px;">
-            <div class="card-body d-flex flex-column align-items-center" style="padding: 1.5rem;">
+          <div class="card flex-grow-1" style="min-width: 250px">
+            <div class="card-body d-flex flex-column align-items-center" style="padding: 1.5rem">
               <h5 class="card-title align-self-start">Total Expenses</h5>
               <h1 class="align-self-center value">₱{{ totalExpenses.toFixed(2) }}</h1>
             </div>

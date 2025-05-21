@@ -8,7 +8,6 @@ body,
   box-sizing: 0;
 }
 
-
 :root {
   --vt-c-white: #ffffff;
   --vt-c-white-soft: #f8f8f8;
@@ -31,12 +30,12 @@ body,
   --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
 
   /* Figma palette */
-  --color-primary: #3A86FF;
-  --color-secondary: #8338EC;
-  --color-neutral-light: #F8F9FA;
-  --color-neutral-dark: #343A40;
-  --color-accent-warning: #FF595E;
-  --color-accent-success: #06D6A0;
+  --color-primary: #3a86ff;
+  --color-secondary: #8338ec;
+  --color-neutral-light: #f8f9fa;
+  --color-neutral-dark: #343a40;
+  --color-accent-warning: #ff595e;
+  --color-accent-success: #06d6a0;
 }
 
 /* semantic color variables for this project */

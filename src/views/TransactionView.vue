@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { LayoutDashboard, BadgeRussianRuble, LogOut, HandCoins } from 'lucide-vue-next';
-import AllTransactions from '../components/AllTransaction.vue';
-import Navbar from '../components/Navbar.vue';
+import { LayoutDashboard, BadgeRussianRuble, LogOut, HandCoins } from 'lucide-vue-next'
+import AllTransactions from '../components/AllTransaction.vue'
+import Navbar from '../components/Navbar.vue'
 </script>
 
 <template>
@@ -10,7 +10,7 @@ import Navbar from '../components/Navbar.vue';
 
     <main class="main-container pt-5">
       <div class="p-3">
-        <h1 style="font-size: 2.5rem; margin-bottom: 1.5rem; font-weight: bold;">Transactions</h1>
+        <h1 style="font-size: 2.5rem; margin-bottom: 1.5rem; font-weight: bold">Transactions</h1>
       </div>
       <AllTransactions />
     </main>
@@ -75,7 +75,6 @@ h5 {
   font-weight: normal;
   margin-bottom: 0.5rem;
 }
-
 
 .card-body h1 {
   color: var(--color-neutral-dark);
