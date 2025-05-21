@@ -42,14 +42,12 @@ const addEntry = async () => {
 
     await fetchData();
 
-    // Hide the modal after adding the entry
     const modalEl = document.getElementById('addEntryModal');
     if (modalEl) {
       const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
       modal.hide();
     }
 
-    // Reset form
     newEntry.value = {
       entry: '',
       type: '',
@@ -58,7 +56,6 @@ const addEntry = async () => {
       description: ''
     };
 
-    // Show toast with auto-hide options
     const toast = document.getElementById('entryToast');
     if (toast) new bootstrap.Toast(toast, { delay: 3000, autohide: true }).show();
 
