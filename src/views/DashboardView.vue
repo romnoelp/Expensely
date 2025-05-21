@@ -1,75 +1,88 @@
 <script setup lang="ts">
-import { LayoutDashboard, BadgeRussianRuble, LogOut, HandCoins } from 'lucide-vue-next';
+import { ref, computed, onMounted } from 'vue';
+import Navbar from '../components/Navbar.vue';
 import RecentTransactions from '../components/RecentTransaction.vue';
+import { supabase } from '../lib/supabase.ts';
+import type Transaction from '../types/transaction.ts';
+
+const transactions = ref<Transaction[]>([]);
+
+const fetchTransactions = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('transaction')
+      .select('entry, type, category, amount, description, created_at')
+      .order('id', { ascending: false })
+      .limit(8);
+
+    if (error) throw error;
+    if (data) transactions.value = data as Transaction[];
+  } catch (error: any) {
+    console.error('Error fetching transactions:', error.message);
+  }
+};
+
+const totalIncome = computed(() =>
+  transactions.value
+    .filter(t => t.type === 'income')
+    .reduce((sum, t) => sum + t.amount, 0)
+);
+
+const totalExpenses = computed(() =>
+  transactions.value
+    .filter(t => t.type === 'expense')
+    .reduce((sum, t) => sum + t.amount, 0)
+);
+
+const totalBalance = computed(() => totalIncome.value - totalExpenses.value);
+
+onMounted(() => {
+  fetchTransactions();
+});
 </script>
 
 <template>
   <div>
-    <nav class="navbar fixed-top" style="background-color: var(--color-primary);">
-      <div class="container-fluid">
-        <div class="d-flex justify-content-center align-items-center gap-2">
-          <HandCoins class="logo-icon" />
-          <a class="navbar-brand" style="color: var(--color-neutral-light); font-size: 1.5rem; font-weight: bold;"
-            href="/">Expensely</a>
-        </div>
-        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
-          aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
-          <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menu</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-          </div>
-          <div class="offcanvas-body">
-            <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="/"
-                  style="font-size: 1.1rem; padding-top: 0.75rem; padding-bottom: 0.75rem;">
-                  <LayoutDashboard class="align-middle me-2" style="width: 20px; height: 20px;" /> Dashboard
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/transactions"
-                  style="font-size: 1.1rem; padding-top: 0.75rem; padding-bottom: 0.75rem;">
-                  <BadgeRussianRuble class="align-middle me-2" style="width: 20px; height: 20px;" /> Transactions
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#" style="font-size: 1.1rem; padding-top: 0.75rem; padding-bottom: 0.75rem;">
-                  <LogOut class="align-middle me-2" style="width: 20px; height: 20px;" /> Logout
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </nav>
+    <Navbar />
 
     <main class="main-container pt-5">
       <div class="p-3">
-        <h1 style="font-size: 2.5rem; margin-bottom: 1.5rem; font-weight: bold;">Dashboard</h1>
+        <h1 class="mb-4" style="font-size: 2.5rem; font-weight: bold;">Dashboard</h1>
 
         <div class="d-flex flex-wrap gap-3 mb-4">
           <div class="card flex-grow-1" style="min-width: 250px;">
             <div class="card-body d-flex flex-column align-items-center" style="padding: 1.5rem;">
               <h5 class="card-title align-self-start"
-                style="font-size: 1rem; font-weight: normal; margin-bottom: 0.5rem;">Total Balance</h5>
-              <h1 class="align-self-center value" style="margin-top: 0.75rem; font-size: 3rem;">₱1,000.00</h1>
+                style="font-size: 1rem; font-weight: normal; margin-bottom: 0.5rem;">
+                Total Balance
+              </h5>
+              <h1 class="align-self-center value" style="margin-top: 0.75rem; font-size: 3rem;">
+                ₱{{ totalBalance.toFixed(2) }}
+              </h1>
             </div>
           </div>
+
           <div class="card flex-grow-1" style="min-width: 250px;">
             <div class="card-body d-flex flex-column align-items-center" style="padding: 1.5rem;">
               <h5 class="card-title align-self-start"
-                style="font-size: 1rem; font-weight: normal; margin-bottom: 0.5rem;">Total Income</h5>
-              <h1 class="align-self-center value" style="margin-top: 0.75rem; font-size: 3rem;">₱1,000.00</h1>
+                style="font-size: 1rem; font-weight: normal; margin-bottom: 0.5rem;">
+                Total Income
+              </h5>
+              <h1 class="align-self-center value" style="margin-top: 0.75rem; font-size: 3rem;">
+                ₱{{ totalIncome.toFixed(2) }}
+              </h1>
             </div>
           </div>
+
           <div class="card flex-grow-1" style="min-width: 250px;">
             <div class="card-body d-flex flex-column align-items-center" style="padding: 1.5rem;">
               <h5 class="card-title align-self-start"
-                style="font-size: 1rem; font-weight: normal; margin-bottom: 0.5rem;">Total Expenses</h5>
-              <h1 class="align-self-center value" style="margin-top: 0.75rem; font-size: 3rem;">₱1,000.00</h1>
+                style="font-size: 1rem; font-weight: normal; margin-bottom: 0.5rem;">
+                Total Expenses
+              </h5>
+              <h1 class="align-self-center value" style="margin-top: 0.75rem; font-size: 3rem;">
+                ₱{{ totalExpenses.toFixed(2) }}
+              </h1>
             </div>
           </div>
         </div>
@@ -140,7 +153,6 @@ h5 {
   font-weight: normal;
   margin-bottom: 0.5rem;
 }
-
 
 .card-body h1 {
   color: var(--color-neutral-dark);
