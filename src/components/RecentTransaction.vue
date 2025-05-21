@@ -152,6 +152,7 @@ onMounted(() => {
               <label class="form-label">Category</label>
               <select class="form-select" v-model="newEntry.category" required>
                 <option disabled value="">Select category</option>
+                <option value="Income">Income</option>
                 <option value="Gym">Gym</option>
                 <option value="School">School</option>
                 <option value="Misc">Misc</option>
